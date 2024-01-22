@@ -70,7 +70,8 @@ jobs:
 
     - name: Update Tailsclae
       run: |
-        git clone -b master https://github.com/immortalwrt/packages.git
+        # git clone -b master https://github.com/immortalwrt/packages.git
+        git clone -b openwrt-23.05 https://github.com/immortalwrt/packages.git
         rm -rf openwrt/feeds/packages/net/tailscale
         cp -r packages/net/tailscale openwrt/feeds/packages/net/tailscale
         sed -i '$ s/nftables/iptables/' openwrt/feeds/packages/net/tailscale/files/tailscale.conf
@@ -116,7 +117,7 @@ jobs:
       uses: actions/upload-artifact@main
       if: steps.compile.outputs.status == 'success'
       with:
-        name: tailscale_${{ env.FILE_DATE }}
+        name: tailscale_ipk${{ env.FILE_DATE }}
         path: openwrt/bin/packages/aarch64_cortex-a53/packages/tailscale*.ipk
 
     - name: Upload bin directory
