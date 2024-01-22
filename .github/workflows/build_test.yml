@@ -112,6 +112,13 @@ jobs:
       if: (!cancelled())
       run: df -hT
 
+    - name: Upload tailscale ipk
+      uses: actions/upload-artifact@main
+      if: steps.compile.outputs.status == 'success'
+      with:
+        name: tailscale_${{ env.FILE_DATE }}
+        path: openwrt/bin/packages/aarch64_cortex-a53/packages/tailscale*.ipk
+
     - name: Upload bin directory
       uses: actions/upload-artifact@main
       if: steps.compile.outputs.status == 'success' && env.UPLOAD_BIN_DIR == 'true'
