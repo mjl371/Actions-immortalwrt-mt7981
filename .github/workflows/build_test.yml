@@ -13,7 +13,16 @@ name: Build Test
 on:
   repository_dispatch:
   workflow_dispatch:
-  push:
+    # push:
+    inputs:
+        packagesBranch:
+          description: 'tailscale分支'
+          required: true
+          default: 'master'
+          type: choice
+          options:
+          - master
+          - openwrt-23.05
 
 env:
   REPO_URL: https://github.com/hanwckf/immortalwrt-mt798x.git
@@ -71,7 +80,8 @@ jobs:
     - name: Update Tailsclae
       run: |
         # git clone -b master https://github.com/immortalwrt/packages.git
-        git clone -b openwrt-23.05 https://github.com/immortalwrt/packages.git
+        # git clone -b openwrt-23.05 https://github.com/immortalwrt/packages.git
+        git clone -b ${{ inputs.packagesBranch }} https://github.com/immortalwrt/packages.git
         rm -rf openwrt/feeds/packages/net/tailscale
         cp -r packages/net/tailscale openwrt/feeds/packages/net/tailscale
         sed -i '$ s/nftables/iptables/' openwrt/feeds/packages/net/tailscale/files/tailscale.conf
