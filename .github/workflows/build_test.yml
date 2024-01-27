@@ -23,7 +23,26 @@ on:
           options:
           - master
           - openwrt-23.05
-
+        UPLOAD_BIN_DIR:
+          description: '上传bin文件夹'
+          default: false
+          required: true
+          type: boolean
+        UPLOAD_FIRMWARE:
+          description: '上传固件'
+          default: false
+          required: true
+          type: boolean
+        UPLOAD_WETRANSFER:
+          description: '上传到WETRANSFER'
+          default: false
+          required: true
+          type: boolean
+        UPLOAD_RELEASE:
+          description: '发布RELEASE'
+          default: false
+          required: true
+          type: boolean
 env:
   REPO_URL: https://github.com/hanwckf/immortalwrt-mt798x.git
   REPO_BRANCH: openwrt-21.02
@@ -31,10 +50,6 @@ env:
   CONFIG_FILE: .config
   DIY_P1_SH: diy-part1.sh
   DIY_P2_SH: diy-part2.sh
-  UPLOAD_BIN_DIR: true
-  UPLOAD_FIRMWARE: true
-  UPLOAD_WETRANSFER: false
-  UPLOAD_RELEASE: false
   TZ: Asia/Shanghai
 
 jobs:
@@ -132,14 +147,14 @@ jobs:
 
     - name: Upload bin directory
       uses: actions/upload-artifact@main
-      if: steps.compile.outputs.status == 'success' && env.UPLOAD_BIN_DIR == 'true'
+      if: steps.compile.outputs.status == 'success' && inputs.UPLOAD_BIN_DIR == 'true'
       with:
         name: OpenWrt_bin${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
         path: openwrt/bin
 
     - name: Organize files
       id: organize
-      if: env.UPLOAD_FIRMWARE == 'true' && !cancelled()
+      if: inputs.UPLOAD_FIRMWARE == 'true' && !cancelled()
       run: |
         cd openwrt/bin/targets/*/*
         rm -rf packages
@@ -155,7 +170,7 @@ jobs:
 
     - name: Upload firmware to WeTransfer
       id: wetransfer
-      if: steps.organize.outputs.status == 'success' && env.UPLOAD_WETRANSFER == 'true' && !cancelled()
+      if: steps.organize.outputs.status == 'success' && inputs.UPLOAD_WETRANSFER == 'true' && !cancelled()
       run: |
         curl -fsSL git.io/file-transfer | sh
         ./transfer wet -s -p 16 --no-progress ${FIRMWARE} 2>&1 | tee wetransfer.log
@@ -164,7 +179,7 @@ jobs:
 
     - name: Generate release tag
       id: tag
-      if: env.UPLOAD_RELEASE == 'true' && !cancelled()
+      if: inputs.UPLOAD_RELEASE == 'true' && !cancelled()
       run: |
         echo "release_tag=$(date +"%Y.%m.%d-%H%M")" >> $GITHUB_OUTPUT
         touch release.txt
