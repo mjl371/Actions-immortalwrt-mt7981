@@ -16,7 +16,7 @@ on:
     # push:
     inputs:
         packagesBranch:
-          description: 'tailscale分支'
+          description: '选择tailscale分支'
           required: true
           default: 'master'
           type: choice
@@ -99,7 +99,9 @@ jobs:
         git clone -b ${{ inputs.packagesBranch }} https://github.com/immortalwrt/packages.git
         rm -rf openwrt/feeds/packages/net/tailscale
         cp -r packages/net/tailscale openwrt/feeds/packages/net/tailscale
+        grep openwrt/feeds/packages/net/tailscale/Makefile |awk -F ':=' '{print $2}' > TAILSCALE_VERSION
         sed -i '$ s/nftables/iptables/' openwrt/feeds/packages/net/tailscale/files/tailscale.conf
+
         rm -rf openwrt/feeds/packages/lang/golang
         cp -r packages/lang/golang openwrt/feeds/packages/lang/golang
 
@@ -142,7 +144,7 @@ jobs:
       uses: actions/upload-artifact@main
       if: steps.compile.outputs.status == 'success'
       with:
-        name: tailscale_ipk${{ env.FILE_DATE }}
+        name: tailscale${{ env.TAILSCALE_VERSION }}ipk 
         path: openwrt/bin/packages/aarch64_cortex-a53/packages/tailscale*.ipk
 
     - name: Upload bin directory
