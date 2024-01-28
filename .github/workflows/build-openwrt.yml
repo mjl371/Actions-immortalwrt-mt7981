@@ -13,6 +13,36 @@ name: Build OpenWrt
 on:
   repository_dispatch:
   workflow_dispatch:
+    # push:
+    inputs:
+        packagesBranch:
+          description: '选择tailscale分支'
+          required: true
+          default: 'master'
+          type: choice
+          options:
+          - master
+          - openwrt-23.05
+        UPLOAD_BIN_DIR:
+          description: '上传bin文件夹'
+          default: false
+          required: true
+          type: boolean
+        UPLOAD_FIRMWARE:
+          description: '上传固件'
+          default: false
+          required: true
+          type: boolean
+        UPLOAD_WETRANSFER:
+          description: '上传到WETRANSFER'
+          default: false
+          required: true
+          type: boolean
+        UPLOAD_RELEASE:
+          description: '发布RELEASE'
+          default: false
+          required: true
+          type: boolean
 
 env:
   REPO_URL: https://github.com/hanwckf/immortalwrt-mt798x.git
@@ -21,15 +51,11 @@ env:
   CONFIG_FILE: .config
   DIY_P1_SH: diy-part1.sh
   DIY_P2_SH: diy-part2.sh
-  UPLOAD_BIN_DIR: true
-  UPLOAD_FIRMWARE: true
-  UPLOAD_WETRANSFER: false
-  UPLOAD_RELEASE: false
   TZ: Asia/Shanghai
 
 jobs:
   build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
 
     steps:
     - name: Checkout
@@ -41,7 +67,9 @@ jobs:
       run: |
         sudo rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc
         sudo -E apt-get -qq update
-        sudo -E apt-get -qq install $(curl -fsSL git.io/depends-ubuntu-2004)
+        sudo -E apt-get -qq install build-essential clang flex bison g++ gawk \
+        gcc-multilib g++-multilib gettext git libncurses-dev libssl-dev \
+        python3-distutils rsync unzip zlib1g-dev file wget
         sudo -E apt-get -qq autoremove --purge
         sudo -E apt-get -qq clean
         sudo timedatectl set-timezone "$TZ"
@@ -64,6 +92,19 @@ jobs:
 
     - name: Update feeds
       run: cd openwrt && ./scripts/feeds update -a
+
+    - name: Update Tailsclae
+      run: |
+        # git clone -b master https://github.com/immortalwrt/packages.git
+        # git clone -b openwrt-23.05 https://github.com/immortalwrt/packages.git
+        git clone -b ${{ inputs.packagesBranch }} https://github.com/immortalwrt/packages.git
+        rm -rf openwrt/feeds/packages/net/tailscale
+        cp -r packages/net/tailscale openwrt/feeds/packages/net/tailscale
+        grep openwrt/feeds/packages/net/tailscale/Makefile |awk -F ':=' '{print $2}' > TAILSCALE_VERSION
+        sed -i '$ s/nftables/iptables/' openwrt/feeds/packages/net/tailscale/files/tailscale.conf
+
+        rm -rf openwrt/feeds/packages/lang/golang
+        cp -r packages/lang/golang openwrt/feeds/packages/lang/golang
 
     - name: Install feeds
       run: cd openwrt && ./scripts/feeds install -a
@@ -100,16 +141,23 @@ jobs:
       if: (!cancelled())
       run: df -hT
 
+    - name: Upload tailscale ipk
+      uses: actions/upload-artifact@main
+      if: steps.compile.outputs.status == 'success'
+      with:
+        name: tailscale${{ env.TAILSCALE_VERSION }}ipk 
+        path: openwrt/bin/packages/aarch64_cortex-a53/packages/tailscale*.ipk
+
     - name: Upload bin directory
       uses: actions/upload-artifact@main
-      if: steps.compile.outputs.status == 'success' && env.UPLOAD_BIN_DIR == 'true'
+      if: steps.compile.outputs.status == 'success' && inputs.UPLOAD_BIN_DIR == 'true'
       with:
         name: OpenWrt_bin${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
         path: openwrt/bin
 
     - name: Organize files
       id: organize
-      if: env.UPLOAD_FIRMWARE == 'true' && !cancelled()
+      if: inputs.UPLOAD_FIRMWARE == 'true' && !cancelled()
       run: |
         cd openwrt/bin/targets/*/*
         rm -rf packages
@@ -125,7 +173,7 @@ jobs:
 
     - name: Upload firmware to WeTransfer
       id: wetransfer
-      if: steps.organize.outputs.status == 'success' && env.UPLOAD_WETRANSFER == 'true' && !cancelled()
+      if: steps.organize.outputs.status == 'success' && inputs.UPLOAD_WETRANSFER == 'true' && !cancelled()
       run: |
         curl -fsSL git.io/file-transfer | sh
         ./transfer wet -s -p 16 --no-progress ${FIRMWARE} 2>&1 | tee wetransfer.log
@@ -134,7 +182,7 @@ jobs:
 
     - name: Generate release tag
       id: tag
-      if: env.UPLOAD_RELEASE == 'true' && !cancelled()
+      if: inputs.UPLOAD_RELEASE == 'true' && !cancelled()
       run: |
         echo "release_tag=$(date +"%Y.%m.%d-%H%M")" >> $GITHUB_OUTPUT
         touch release.txt
@@ -151,6 +199,20 @@ jobs:
         tag_name: ${{ steps.tag.outputs.release_tag }}
         body_path: release.txt
         files: ${{ env.FIRMWARE }}/*
+
+    - name: Clean Compile
+      id: clean-compile
+      run: |
+        cd openwrt
+        make clean
+
+    - name: Cache Compile
+      id: cache-compile
+      uses: actions/cache/save@v4
+      if: steps.compile.outputs.status == 'success'
+      with:
+        path: openwrt
+        key: ${{ runner.os }}-openwrt-${{ hashFiles('feeds.conf.default') }}
 
     - name: Delete workflow runs
       uses: Mattraks/delete-workflow-runs@v2
