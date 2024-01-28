@@ -15,34 +15,35 @@ on:
   workflow_dispatch:
     # push:
     inputs:
-        packagesBranch:
-          description: '选择tailscale分支'
-          required: true
-          default: 'master'
-          type: choice
-          options:
-          - master
-          - openwrt-23.05
-        UPLOAD_BIN_DIR:
-          description: '上传bin文件夹'
-          default: false
-          required: true
-          type: boolean
-        UPLOAD_FIRMWARE:
-          description: '上传固件'
-          default: false
-          required: true
-          type: boolean
-        USE_CACHE:
-          description: '使用缓存'
-          default: false
-          required: true
-          type: boolean
-        COMPILE:
-          description: '是否编译'
-          default: true
-          required: true
-          type: boolean
+      tailscaleBranch:
+        description: '选择tailscale分支'
+        required: true
+        default: 'master'
+        type: choice
+        options:
+        - master
+        - openwrt-23.05
+        - false
+      UPLOAD_BIN_DIR:
+        description: '上传bin文件夹'
+        default: false
+        required: true
+        type: boolean
+      UPLOAD_FIRMWARE:
+        description: '上传固件'
+        default: false
+        required: true
+        type: boolean
+      USE_CACHE:
+        description: '使用缓存'
+        default: false
+        required: true
+        type: boolean
+      COMPILE:
+        description: '是否编译'
+        default: true
+        required: true
+        type: boolean
           
 env:
   REPO_URL: https://github.com/hanwckf/immortalwrt-mt798x.git
@@ -60,6 +61,12 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@main
+
+    - name: test
+      if: ${{ inputs.COMPILE }}
+      run: |
+        echo "${{ toJson(inputs) }}"
+        echo "test step"
 
     - name: Initialization environment
       env:
@@ -99,7 +106,7 @@ jobs:
       run: |
         # git clone -b master https://github.com/immortalwrt/packages.git
         # git clone -b openwrt-23.05 https://github.com/immortalwrt/packages.git
-        git clone -b ${{ inputs.packagesBranch }} https://github.com/immortalwrt/packages.git
+        git clone -b ${{ inputs.tailscaleBranch }} https://github.com/immortalwrt/packages.git
         rm -rf openwrt/feeds/packages/net/tailscale
         cp -r packages/net/tailscale openwrt/feeds/packages/net/tailscale
 
@@ -149,7 +156,7 @@ jobs:
 
     - name: Upload tailscale ipk
       uses: actions/upload-artifact@main
-      if: steps.compile.outputs.status == 'success'
+      if: steps.compile.outputs.status == 'success' && ${{ inputs.tailscaleBranch }}
       with:
         name: tailscale_${{ env.TAILSCALE_VERSION }}_ipk 
         path: openwrt/bin/packages/aarch64_cortex-a53/packages/tailscale*.ipk
