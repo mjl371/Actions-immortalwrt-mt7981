@@ -156,10 +156,11 @@ jobs:
       run: |
         cd openwrt
         make package/tailscale/compile V=s -j$(nproc)
+        echo "tailscaleStatus=success" >> $GITHUB_OUTPUT
         
     - name: Upload tailscale ipk
       uses: actions/upload-artifact@main
-      if: steps.compile.outputs.status == 'success'
+      if: steps.compile.outputs.status == 'success' || steps.compileTailscale.outputs.tailscaleStatus == 'success'
       with:
         name: tailscale${{ env.TAILSCALE_VERSION }}ipk 
         path: openwrt/bin/packages/aarch64_cortex-a53/packages/tailscale*.ipk
