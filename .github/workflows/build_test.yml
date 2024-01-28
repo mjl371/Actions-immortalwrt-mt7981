@@ -43,6 +43,11 @@ on:
           default: true
           required: true
           type: boolean
+        COMPILE_TAILSCALE:
+          description: '编译tailscale'
+          default: false
+          required: true
+          type: boolean
           
 env:
   REPO_URL: https://github.com/hanwckf/immortalwrt-mt798x.git
@@ -145,6 +150,13 @@ jobs:
       if: (!cancelled())
       run: df -hT
 
+    - name: Compile tailscale
+      id: compileTailscale
+      if: inputs.COMPILE_TAILSCALE == 'true' && !cancelled()
+      run: |
+        cd openwrt
+        make package/tailscale/compile V=s -j$(nproc)
+        
     - name: Upload tailscale ipk
       uses: actions/upload-artifact@main
       if: steps.compile.outputs.status == 'success'
