@@ -23,7 +23,7 @@ on:
         options:
         - master
         - openwrt-23.05
-        - false
+        - none
       UPLOAD_BIN_DIR:
         description: '上传bin文件夹'
         default: false
@@ -103,6 +103,7 @@ jobs:
       run: cd openwrt && ./scripts/feeds update -a
 
     - name: Update Tailsclae
+      if:  ${{ inputs.tailscaleBranch }}!= 'none'
       run: |
         # git clone -b master https://github.com/immortalwrt/packages.git
         # git clone -b openwrt-23.05 https://github.com/immortalwrt/packages.git
@@ -156,7 +157,7 @@ jobs:
 
     - name: Upload tailscale ipk
       uses: actions/upload-artifact@main
-      if: steps.compile.outputs.status == 'success' && ${{ inputs.tailscaleBranch }}
+      if: steps.compile.outputs.status == 'success' && ${{ inputs.tailscaleBranch }}!= 'none'
       with:
         name: tailscale_${{ env.TAILSCALE_VERSION }}_ipk 
         path: openwrt/bin/packages/aarch64_cortex-a53/packages/tailscale*.ipk
@@ -170,7 +171,7 @@ jobs:
 
     - name: Organize files
       id: organize
-      if: ${{ inputs.UPLOAD_FIRMWARE }}  && !cancelled()
+      if: ${{ inputs.UPLOAD_FIRMWARE }} && !cancelled()
       run: |
         cd openwrt/bin/targets/*/*
         rm -rf packages
