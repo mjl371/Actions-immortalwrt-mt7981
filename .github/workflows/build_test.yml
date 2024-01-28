@@ -133,7 +133,7 @@ jobs:
 
     - name: Compile the firmware
       id: compile
-      if: inputs.COMPILE == true && !cancelled()
+      if: ${{ inputs.COMPILE }} && !cancelled()
       run: |
         cd openwrt
         echo -e "$(nproc) thread compile"
@@ -156,14 +156,14 @@ jobs:
 
     - name: Upload bin directory
       uses: actions/upload-artifact@main
-      if: steps.compile.outputs.status == 'success' && inputs.UPLOAD_BIN_DIR == true
+      if: steps.compile.outputs.status == 'success' && ${{ inputs.UPLOAD_BIN_DIR }}
       with:
         name: OpenWrt_bin${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
         path: openwrt/bin
 
     - name: Organize files
       id: organize
-      if: inputs.UPLOAD_FIRMWARE == true && !cancelled()
+      if: ${{ inputs.UPLOAD_FIRMWARE }}  && !cancelled()
       run: |
         cd openwrt/bin/targets/*/*
         rm -rf packages
