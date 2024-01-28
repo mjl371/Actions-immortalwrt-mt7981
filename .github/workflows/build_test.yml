@@ -70,6 +70,8 @@ jobs:
       env:
         DEBIAN_FRONTEND: noninteractive
       run: |
+        cat ${{ inputs }}
+
         sudo rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc
         sudo -E apt-get -qq update
         sudo -E apt-get -qq install build-essential clang flex bison g++ gawk \
