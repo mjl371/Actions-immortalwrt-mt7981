@@ -182,8 +182,14 @@ jobs:
     - name: Clean Compile
       id: clean-compile
       run: |
+        pwd
+        ls
         cd openwrt
+        ls
         make clean
+        ls
+        ls -lh
+        du
 
     - name: Cache Compile
       id: cache-compile
