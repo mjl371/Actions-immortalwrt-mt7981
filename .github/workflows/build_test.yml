@@ -106,11 +106,8 @@ jobs:
         rm -rf openwrt/feeds/packages/net/tailscale
         cp -r packages/net/tailscale openwrt/feeds/packages/net/tailscale
 
-        cat openwrt/feeds/packages/net/tailscale/Makefile
-        grep PKG_VERSION:= openwrt/feeds/packages/net/tailscale/Makefile
-
         grep PKG_VERSION:= openwrt/feeds/packages/net/tailscale/Makefile |awk -F ':=' '{print $2}' > TAILSCALE_VERSION
-        echo "TAILSCALE_VERSION=_$(cat TAILSCALE_VERSION)" >> $GITHUB_ENV
+        echo "TAILSCALE_VERSION=$(cat TAILSCALE_VERSION)" >> $GITHUB_ENV
 
         sed -i '$ s/nftables/iptables/' openwrt/feeds/packages/net/tailscale/files/tailscale.conf
 
