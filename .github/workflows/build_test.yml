@@ -70,6 +70,7 @@ jobs:
       env:
         DEBIAN_FRONTEND: noninteractive
       run: |
+        echo ${{ toJson(inputs) }}
 
         sudo rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc
         sudo -E apt-get -qq update
@@ -149,7 +150,7 @@ jobs:
 
     - name: Compile tailscale
       id: compileTailscale
-
+      if: inputs.COMPILE_TAILSCALE == 'true' && !cancelled()
       run: |
         cd openwrt
         make package/tailscale/compile V=s -j$(nproc)
