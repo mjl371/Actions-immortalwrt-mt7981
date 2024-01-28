@@ -33,16 +33,6 @@ on:
           default: false
           required: true
           type: boolean
-        UPLOAD_WETRANSFER:
-          description: '上传到WETRANSFER'
-          default: false
-          required: true
-          type: boolean
-        UPLOAD_RELEASE:
-          description: '发布RELEASE'
-          default: false
-          required: true
-          type: boolean
         USE_CACHE:
           description: '使用缓存'
           default: false
@@ -190,7 +180,7 @@ jobs:
       run: |
         cd openwrt
         make clean
-        
+
     - name: Cache Compile
       id: cache-compile
       uses: actions/cache/save@v4

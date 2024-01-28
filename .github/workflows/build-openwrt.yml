@@ -215,18 +215,18 @@ jobs:
       if: steps.compile.outputs.status == 'success'
       with:
         path: openwrt
-        key: ${{ runner.os }}-openwrt-${{ hashFiles('feeds.conf.default') }}
+        key: ${{ runner.os }}-openwrt-${{ hashFiles('openwrt/feeds.conf.default') }}
 
     - name: Delete workflow runs
       uses: Mattraks/delete-workflow-runs@v2
       with:
         token: ${{ github.token }}
         repository: ${{ github.repository }}
-        retain_days: 30
-        keep_minimum_runs: 6
+        retain_days: 7
+        keep_minimum_runs: 3
 
     - name: Remove old Releases
-      uses: dev-drprasad/delete-older-releases@v0.1.0
+      uses: dev-drprasad/delete-older-releases@v0.3.2
       if: env.UPLOAD_RELEASE == 'true' && !cancelled()
       with:
         keep_latest: 3
