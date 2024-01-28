@@ -133,7 +133,7 @@ jobs:
 
     - name: Compile the firmware
       id: compile
-      if: inputs.COMPILE == 'true' && !cancelled()
+      if: inputs.COMPILE == true && !cancelled()
       run: |
         cd openwrt
         echo -e "$(nproc) thread compile"
@@ -149,21 +149,21 @@ jobs:
 
     - name: Upload tailscale ipk
       uses: actions/upload-artifact@main
-      if: steps.compile.outputs.status == 'success' || steps.compileTailscale.outputs.tailscaleStatus == 'success'
+      if: steps.compile.outputs.status == 'success'
       with:
         name: tailscale_${{ env.TAILSCALE_VERSION }}_ipk 
         path: openwrt/bin/packages/aarch64_cortex-a53/packages/tailscale*.ipk
 
     - name: Upload bin directory
       uses: actions/upload-artifact@main
-      if: steps.compile.outputs.status == 'success' && inputs.UPLOAD_BIN_DIR == 'true'
+      if: steps.compile.outputs.status == 'success' && inputs.UPLOAD_BIN_DIR == true
       with:
         name: OpenWrt_bin${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
         path: openwrt/bin
 
     - name: Organize files
       id: organize
-      if: inputs.UPLOAD_FIRMWARE == 'true' && !cancelled()
+      if: inputs.UPLOAD_FIRMWARE == true && !cancelled()
       run: |
         cd openwrt/bin/targets/*/*
         rm -rf packages
