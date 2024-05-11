@@ -111,7 +111,7 @@ jobs:
         rm -rf openwrt/feeds/packages/net/tailscale
         cp -r packages/net/tailscale openwrt/feeds/packages/net/tailscale
 
-        mv -f openwrt/feeds/packages/net/tailscale/Makefile1 openwrt/feeds/packages/net/tailscale/Makefile
+        mv -f tailscale/Makefile openwrt/feeds/packages/net/tailscale/Makefile
         
         grep PKG_VERSION:= openwrt/feeds/packages/net/tailscale/Makefile |awk -F ':=' '{print $2}' > TAILSCALE_VERSION
         echo "TAILSCALE_VERSION=$(cat TAILSCALE_VERSION)" >> $GITHUB_ENV
