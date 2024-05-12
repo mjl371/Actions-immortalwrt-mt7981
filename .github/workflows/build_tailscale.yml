@@ -38,8 +38,6 @@ jobs:
       env:
         DEBIAN_FRONTEND: noninteractive
       run: |
-
-        sudo rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc
         sudo -E apt-get -qq update
         sudo -E apt-get -qq install build-essential clang flex bison g++ gawk \
         gcc-multilib g++-multilib gettext git libncurses-dev libssl-dev \
@@ -54,12 +52,9 @@ jobs:
       working-directory: /workdir
       run: |
         df -hT $PWD
-        wget -q https://github.com/mjl371/Actions-immortalwrt-mt7981/releases/download/sdk/immortalwrt-sdk-mediatek-mt7981_gcc-8.4.0_musl.Linux-x86_64.tar.xz
-        tar -xf *.tar.xz 
-        ls
-        mkdir -p openwrt
-        ls
-        mv immortalwrt-sdk* openwrt
+        wget -q https://github.com/mjl371/Actions-immortalwrt-mt7981/releases/download/sdk/immortalwrt-sdk-mediatek-mt7981_gcc-8.4.0_musl.Linux-x86_64.tar.xz \
+        -O openwrt.tar.xz 
+        tar -xf openwrt.tar.xz 
         ls
         ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
         cd openwrt
