@@ -211,9 +211,8 @@ jobs:
 
     - name: action-bark
       uses: harryzcy/action-bark@v2.0.3
+      if: ${{ !cancelled() }}
       with:
         status: ${{ job.status }}
         device_key: ${{ secrets.BARK_DEVICE_KEY }}
         bark_server_url: ${{ secrets.BARK_SERVER_URL }}
-        if: always() # Pick up events even if the job fails or is canceled.
-            
