@@ -154,6 +154,7 @@ jobs:
 
     - name: action-bark
       uses: harryzcy/action-bark@v2.0.3
+      if: ${{ !cancelled() }}
       with:
         status: ${{ job.status }}
         device_key: ${{ secrets.BARK_DEVICE_KEY }}
