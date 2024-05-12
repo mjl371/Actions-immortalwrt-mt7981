@@ -158,5 +158,4 @@ jobs:
         status: ${{ job.status }}
         device_key: ${{ secrets.BARK_DEVICE_KEY }}
         bark_server_url: ${{ secrets.BARK_SERVER_URL }}
-        if: ${{ cancelled() }}
-            
+        if: ${{ !cancelled() }}
