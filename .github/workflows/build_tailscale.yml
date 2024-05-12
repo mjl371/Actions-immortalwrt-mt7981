@@ -99,7 +99,7 @@ jobs:
         cd openwrt
         echo -e "$(nproc) thread compile"
         
-        make -j$(nproc) || make -j1 || make -j1 V=s
+        # make -j$(nproc) || make -j1 || make -j1 V=s
 
         make j$(nproc) package/golang/compile V=99
         make j$(nproc) package/tailscale/compile V=99
