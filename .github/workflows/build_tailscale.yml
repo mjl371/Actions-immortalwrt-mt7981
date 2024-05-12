@@ -66,22 +66,22 @@ jobs:
         # sed -i '2s/openwrt-21.02/master/' feeds.conf.default
         ./scripts/feeds update -a
 
-    # - name: Update Tailsclae
-    #   if:  ${{ inputs.tailscaleBranch }}!= 'none'
-    #   run: |
-    #     git clone -b ${{ inputs.tailscaleBranch }} https://github.com/immortalwrt/packages.git
-    #     rm -rf openwrt/feeds/packages/net/tailscale
-    #     cp -r packages/net/tailscale openwrt/feeds/packages/net/tailscale
+    - name: Update Tailsclae
+      if:  ${{ inputs.tailscaleBranch }}!= 'none'
+      run: |
+        git clone -b ${{ inputs.tailscaleBranch }} https://github.com/immortalwrt/packages.git
+        rm -rf openwrt/feeds/packages/net/tailscale
+        cp -r packages/net/tailscale openwrt/feeds/packages/net/tailscale
 
-    #     mv -f tailscale/Makefile openwrt/feeds/packages/net/tailscale/Makefile
+        # mv -f tailscale/Makefile openwrt/feeds/packages/net/tailscale/Makefile
         
-    #     grep PKG_VERSION:= openwrt/feeds/packages/net/tailscale/Makefile |awk -F ':=' '{print $2}' > TAILSCALE_VERSION
-    #     echo "TAILSCALE_VERSION=$(cat TAILSCALE_VERSION)" >> $GITHUB_ENV
+        grep PKG_VERSION:= openwrt/feeds/packages/net/tailscale/Makefile |awk -F ':=' '{print $2}' > TAILSCALE_VERSION
+        echo "TAILSCALE_VERSION=$(cat TAILSCALE_VERSION)" >> $GITHUB_ENV
 
-    #     sed -i '$ s/nftables/iptables/' openwrt/feeds/packages/net/tailscale/files/tailscale.conf
+        sed -i '$ s/nftables/iptables/' openwrt/feeds/packages/net/tailscale/files/tailscale.conf
 
-    #     rm -rf openwrt/feeds/packages/lang/golang
-    #     cp -r packages/lang/golang openwrt/feeds/packages/lang/golang
+        rm -rf openwrt/feeds/packages/lang/golang
+        cp -r packages/lang/golang openwrt/feeds/packages/lang/golang
 
     - name: Install feeds
       run: cd openwrt && ./scripts/feeds install -a
