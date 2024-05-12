@@ -69,7 +69,8 @@ jobs:
     - name: Update Tailsclae
       if:  ${{ inputs.tailscaleBranch }}!= 'none'
       run: |
-        git clone -b ${{ inputs.tailscaleBranch }} https://github.com/immortalwrt/packages.git
+        # git clone -b ${{ inputs.tailscaleBranch }} https://github.com/immortalwrt/packages.git
+         git clone -b master https://github.com/immortalwrt/packages.git
         rm -rf openwrt/feeds/packages/net/tailscale
         cp -r packages/net/tailscale openwrt/feeds/packages/net/tailscale
 
