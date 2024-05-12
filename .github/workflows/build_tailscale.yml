@@ -62,8 +62,8 @@ jobs:
     - name: Update feeds
       run: |
         cd openwrt 
-         sed -i '3,5d' feeds.conf.default
-         sed -i '2s/openwrt-21.02/master/' feeds.conf.default
+        sed -i '3,5d' feeds.conf.default
+        # sed -i '2s/openwrt-21.02/master/' feeds.conf.default
         ./scripts/feeds update -a
 
     # - name: Update Tailsclae
