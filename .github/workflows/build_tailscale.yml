@@ -52,9 +52,9 @@ jobs:
       working-directory: /workdir
       run: |
         df -hT $PWD
-        wget -q https://github.com/mjl371/Actions-immortalwrt-mt7981/releases/download/sdk/immortalwrt-sdk-mediatek-mt7981_gcc-8.4.0_musl.Linux-x86_64.tar.xz \
-        -O openwrt.tar.xz 
-        tar -xf openwrt.tar.xz 
+        wget -q https://github.com/mjl371/Actions-immortalwrt-mt7981/releases/download/sdk/immortalwrt-sdk-mediatek-mt7981_gcc-8.4.0_musl.Linux-x86_64.tar.xz 
+        tar -xf *.tar.xz 
+        mv immortalwrt-sdk-mediatek-mt7981_gcc-8.4.0_musl.Linux-x86_64 openwrt
         ls
         ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
         cd openwrt
