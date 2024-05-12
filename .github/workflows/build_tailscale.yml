@@ -56,9 +56,14 @@ jobs:
         df -hT $PWD
         wget -q https://github.com/mjl371/Actions-immortalwrt-mt7981/releases/download/sdk/immortalwrt-sdk-mediatek-mt7981_gcc-8.4.0_musl.Linux-x86_64.tar.xz
         tar -xf *.tar.xz 
+        ls
         mkdir -p openwrt
+        ls
         mv immortalwrt-sdk* openwrt
+        ls
         ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
+        cd openwrt
+        ls
         
     - name: Update feeds
       run: cd openwrt && ./scripts/feeds update -a
