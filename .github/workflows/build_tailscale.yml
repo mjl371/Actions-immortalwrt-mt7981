@@ -51,13 +51,13 @@ jobs:
         sudo mkdir -p /workdir
         sudo chown $USER:$GROUPS /workdir
 
-    - name: Clone source code
+    - name: use sdk
       working-directory: /workdir
       run: |
         df -hT $PWD
-        git clone $REPO_URL -b $REPO_BRANCH openwrt
-        ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
-
+        curl -s https://github.com/mjl371/Actions-immortalwrt-mt7981/releases/download/sdk/immortalwrt-sdk-mediatek-mt7981_gcc-8.4.0_musl.Linux-x86_64.tar.xz
+        tar -xf *.tar.xz -C openwrt
+        
     - name: Update feeds
       run: cd openwrt && ./scripts/feeds update -a
 
@@ -88,7 +88,7 @@ jobs:
       run: |
         cd openwrt
         make defconfig
-        make download -j8
+        make download -j$(nproc)
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
 
@@ -99,16 +99,9 @@ jobs:
         cd openwrt
         echo -e "$(nproc) thread compile"
         
-        # make -j$(nproc) || make -j1 || make -j1 V=s
-        make tools/install V=s -j$(nproc)
-        make toolchain/install V=s -j$(nproc)
-
-        make package/golang/compile V=s -j$(nproc)
         make package/tailscale/compile V=s -j$(nproc)
 
-        
         echo "status=success" >> $GITHUB_OUTPUT
-
         echo "FILE_DATE=_$(date +"%Y%m%d%H%M")" >> $GITHUB_ENV
 
     - name: Check space usage
