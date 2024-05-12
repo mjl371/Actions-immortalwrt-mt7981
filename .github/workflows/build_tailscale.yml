@@ -2,8 +2,8 @@
 name: Build Tailscale
 on:
   repository_dispatch:
+    push:
   workflow_dispatch:
-    # push:
     inputs:
       tailscaleBranch:
         description: '选择tailscale分支'
@@ -56,7 +56,8 @@ jobs:
       run: |
         df -hT $PWD
         wget https://github.com/mjl371/Actions-immortalwrt-mt7981/releases/download/sdk/immortalwrt-sdk-mediatek-mt7981_gcc-8.4.0_musl.Linux-x86_64.tar.xz
-        tar -xf *.tar.xz -C openwrt
+        tar -xf *.tar.xz 
+        mv immortalwrt-sdk* openwrt
         
     - name: Update feeds
       run: cd openwrt && ./scripts/feeds update -a
