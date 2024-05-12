@@ -55,7 +55,7 @@ jobs:
       working-directory: /workdir
       run: |
         df -hT $PWD
-        curl -s https://github.com/mjl371/Actions-immortalwrt-mt7981/releases/download/sdk/immortalwrt-sdk-mediatek-mt7981_gcc-8.4.0_musl.Linux-x86_64.tar.xz
+        wget https://github.com/mjl371/Actions-immortalwrt-mt7981/releases/download/sdk/immortalwrt-sdk-mediatek-mt7981_gcc-8.4.0_musl.Linux-x86_64.tar.xz
         tar -xf *.tar.xz -C openwrt
         
     - name: Update feeds
