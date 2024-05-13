@@ -64,23 +64,30 @@ jobs:
     - name: Update Tailsclae
       if:  ${{ inputs.tailscaleBranch }}!= 'none'
       run: |
-        git clone -b master https://github.com/immortalwrt/packages.git
-        rm -rf openwrt/feeds/packages/net/tailscale
-        cp -r packages/net/tailscale openwrt/feeds/packages/net/tailscale
-
-        git clone https://github.com/mjl371/Actions-immortalwrt-mt7981.git
-        mv -f Actions-immortalwrt-mt7981/tailscale/Makefile openwrt/feeds/packages/net/tailscale/Makefile
-
-        # curl -s https://api.github.com/repos/tailscale/tailscale/releases/latest |jq -r '.tag_name' |sed 's/v//' > TAILSCALE_VERSION
-        grep PKG_VERSION:= openwrt/feeds/packages/net/tailscale/Makefile |awk -F ':=' '{print $2}' > TAILSCALE_VERSION
-        
-        echo "TAILSCALE_VERSION=$(cat TAILSCALE_VERSION)" >> $GITHUB_ENV
-
-        sed -i '$ s/nftables/iptables/' openwrt/feeds/packages/net/tailscale/files/tailscale.conf
-
+      
+        git clone -b master https://github.com/openwrt/packages.git
+  
         rm -rf openwrt/feeds/packages/lang/golang
         cp -r packages/lang/golang openwrt/feeds/packages/lang/golang
-
+        
+        rm -rf openwrt/feeds/packages/net/tailscale
+        cp -r packages/net/tailscale openwrt/feeds/packages/net/tailscale
+        
+        # git clone https://github.com/mjl371/Actions-immortalwrt-mt7981.git
+        # mv -f Actions-immortalwrt-mt7981/tailscale/Makefile openwrt/feeds/packages/net/tailscale/Makefile
+        # grep PKG_VERSION:= openwrt/feeds/packages/net/tailscale/Makefile |awk -F ':=' '{print $2}' > TAILSCALE_VERSION
+        
+        curl -s https://api.github.com/repos/tailscale/tailscale/releases/latest |jq -r '.tag_name' |sed 's/v//' > TAILSCALE_VERSION
+        echo "TAILSCALE_VERSION=$(cat TAILSCALE_VERSION)" >> $GITHUB_ENV
+        
+        wget -O tailscale.latest -q "https://codeload.github.com/tailscale/tailscale/tar.gz/v$TAILSCALE_VERSION"
+        sha256sum tailscale.latest |awk '{print $1}' > PKGTHASH
+        
+        sed -i "s/PKG_VERSION:=.*/PKG_VERSION:=$(cat TAILSCALE_VERSION)/" openwrt/feeds/packages/net/tailscale/Makefile
+        sed -i "s/PKG_HASH:=.*/PKG_HASH:=$(cat PKGTHASH)/" openwrt/feeds/packages/net/tailscale/Makefile
+        
+        sed -i '$ s/nftables/iptables/' openwrt/feeds/packages/net/tailscale/files/tailscale.conf
+        
     - name: Install feeds
       run: cd openwrt && ./scripts/feeds install -a
         
