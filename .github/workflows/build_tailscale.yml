@@ -79,14 +79,19 @@ jobs:
         
         curl -s https://api.github.com/repos/tailscale/tailscale/releases/latest |jq -r '.tag_name' |sed 's/v//' > TAILSCALE_VERSION
         echo "TAILSCALE_VERSION=$(cat TAILSCALE_VERSION)" >> $GITHUB_ENV
+
+        ls
+        cat TAILSCALE_VERSION
         
-        wget -O tailscale.latest -q "https://codeload.github.com/tailscale/tailscale/tar.gz/v$TAILSCALE_VERSION"
-        sha256sum tailscale.latest |awk '{print $1}' > PKGTHASH
+        wget -O tailscale.latest "https://codeload.github.com/tailscale/tailscale/tar.gz/v$TAILSCALE_VERSION"
+        sha256sum tailscale.latest |awk '{print $1}' > PKGHASH
         
         # sed -i "s/PKG_VERSION:=.*/PKG_VERSION:=$(cat TAILSCALE_VERSION)/" openwrt/feeds/packages/net/tailscale/Makefile
-        # sed -i "s/PKG_HASH:=.*/PKG_HASH:=$(cat PKGTHASH)/" openwrt/feeds/packages/net/tailscale/Makefile
+        # sed -i "s/PKG_HASH:=.*/PKG_HASH:=$(cat PKGHASH)/" openwrt/feeds/packages/net/tailscale/Makefile
+
+        cat openwrt/feeds/packages/net/tailscale/Makefile
         
-        # sed -i '$ s/nftables/iptables/' openwrt/feeds/packages/net/tailscale/files/tailscale.conf
+        sed -i '$ s/nftables/iptables/' openwrt/feeds/packages/net/tailscale/files/tailscale.conf
         
     - name: Install feeds
       run: cd openwrt && ./scripts/feeds install -a
