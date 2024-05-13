@@ -1,7 +1,7 @@
 
 name: Build Tailscale
 on:
-  push:
+  # push:
   workflow_dispatch:
     inputs:
       tailscaleBranch:
