@@ -1,4 +1,3 @@
-
 name: Build Tailscale
 on:
   # push:
@@ -57,7 +56,7 @@ jobs:
         ./scripts/feeds update -a
 
     - name: Update Tailsclae
-      if:  ${{ inputs.tailscaleBranch }}!= 'none'
+
       run: |
       
         git clone -b master https://github.com/openwrt/packages.git
