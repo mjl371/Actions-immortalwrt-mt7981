@@ -37,9 +37,9 @@ jobs:
     - name: Use Sdk
       working-directory: /workdir
       run: |
-        wget -q "${{ inputs.sdkURL }}"
+        wget "${{ inputs.sdkURL }}"
         tar -xf *.tar.xz 
-        mv $(echo "${{ inputs.sdkURL }}"| sed 's/.\{7\}$//' ) openwrt
+        mv $(basename "${{ inputs.sdkURL }}"| sed 's/.\{7\}$//' ) openwrt
         ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
         
     - name: Update feeds
