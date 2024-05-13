@@ -4,21 +4,13 @@ on:
   # push:
   workflow_dispatch:
     inputs:
-      tailscaleBranch:
-        description: '选择tailscale分支'
+      sdkURL:
+        description: 'sdk地址'
         required: true
-        default: 'master'
-        type: choice
-        options:
-        - master
-        - openwrt-23.05
-        - none
+        default: 'https://github.com/mjl371/Actions-immortalwrt-mt7981/releases/download/sdk/immortalwrt-sdk-mediatek-mt7981_gcc-8.4.0_musl.Linux-x86_64.tar.xz'
+        type: input
           
 env:
-  REPO_URL: https://github.com/hanwckf/immortalwrt-mt798x.git
-  REPO_BRANCH: openwrt-21.02
-  FEEDS_CONF: feeds.conf.default
-  CONFIG_FILE: .config
   TZ: Asia/Shanghai
 
 jobs:
@@ -45,7 +37,7 @@ jobs:
     - name: Use Sdk
       working-directory: /workdir
       run: |
-        wget -q https://github.com/mjl371/Actions-immortalwrt-mt7981/releases/download/sdk/immortalwrt-sdk-mediatek-mt7981_gcc-8.4.0_musl.Linux-x86_64.tar.xz 
+        wget -q "${{ inputs.sdkURL }}"
         tar -xf *.tar.xz 
         mv immortalwrt-sdk-mediatek-mt7981_gcc-8.4.0_musl.Linux-x86_64 openwrt
         ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
@@ -107,7 +99,7 @@ jobs:
       if: steps.compile.outputs.status == 'success' && ${{ inputs.tailscaleBranch }}!= 'none'
       with:
         name: tailscale_${{ env.TAILSCALE_VERSION }}_ipk 
-        path: openwrt/bin/packages/aarch64_cortex-a53/packages/tailscale*.ipk
+        path: openwrt/bin/packages/*/packages/tailscale*.ipk
 
     - name: Clean Compile
       id: clean-compile
