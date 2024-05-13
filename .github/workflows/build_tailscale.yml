@@ -65,7 +65,7 @@ jobs:
       if:  ${{ inputs.tailscaleBranch }}!= 'none'
       run: |
       
-        git clone -b master https://github.com/openwrt/packages.git
+        git clone -b master https://github.com/immortalwrt/packages.git
   
         rm -rf openwrt/feeds/packages/lang/golang
         cp -r packages/lang/golang openwrt/feeds/packages/lang/golang
