@@ -80,8 +80,8 @@ jobs:
         curl -s https://api.github.com/repos/tailscale/tailscale/releases/latest |jq -r '.tag_name' |sed 's/v//' > TAILSCALE_VERSION
         echo "TAILSCALE_VERSION=$(cat TAILSCALE_VERSION)" >> $GITHUB_ENV
         
-        # wget -O tailscale.latest -q "https://codeload.github.com/tailscale/tailscale/tar.gz/v$TAILSCALE_VERSION"
-        # sha256sum tailscale.latest |awk '{print $1}' > PKGTHASH
+        wget -O tailscale.latest -q "https://codeload.github.com/tailscale/tailscale/tar.gz/v$TAILSCALE_VERSION"
+        sha256sum tailscale.latest |awk '{print $1}' > PKGTHASH
         
         # sed -i "s/PKG_VERSION:=.*/PKG_VERSION:=$(cat TAILSCALE_VERSION)/" openwrt/feeds/packages/net/tailscale/Makefile
         # sed -i "s/PKG_HASH:=.*/PKG_HASH:=$(cat PKGTHASH)/" openwrt/feeds/packages/net/tailscale/Makefile
