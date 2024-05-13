@@ -83,11 +83,11 @@ jobs:
         ls
         cat TAILSCALE_VERSION
         
-        wget -O tailscale.latest "https://codeload.github.com/tailscale/tailscale/tar.gz/v$TAILSCALE_VERSION"
+        wget -O tailscale.latest  "https://codeload.github.com/tailscale/tailscale/tar.gz/v$(cat TAILSCALE_VERSION)"
         sha256sum tailscale.latest |awk '{print $1}' > PKGHASH
         
-        # sed -i "s/PKG_VERSION:=.*/PKG_VERSION:=$(cat TAILSCALE_VERSION)/" openwrt/feeds/packages/net/tailscale/Makefile
-        # sed -i "s/PKG_HASH:=.*/PKG_HASH:=$(cat PKGHASH)/" openwrt/feeds/packages/net/tailscale/Makefile
+        sed -i "s/PKG_VERSION:=.*/PKG_VERSION:=$(cat TAILSCALE_VERSION)/" openwrt/feeds/packages/net/tailscale/Makefile
+        sed -i "s/PKG_HASH:=.*/PKG_HASH:=$(cat PKGHASH)/" openwrt/feeds/packages/net/tailscale/Makefile
 
         cat openwrt/feeds/packages/net/tailscale/Makefile
         
