@@ -39,7 +39,7 @@ jobs:
       run: |
         wget -q "${{ inputs.sdkURL }}"
         tar -xf *.tar.xz 
-        mv immortalwrt-sdk-mediatek-mt7981_gcc-8.4.0_musl.Linux-x86_64 openwrt
+        mv $(echo "${{ inputs.sdkURL }}"| sed 's/.\{7\}$//' ) openwrt
         ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
         
     - name: Update feeds
