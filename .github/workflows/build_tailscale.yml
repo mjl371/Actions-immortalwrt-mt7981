@@ -9,6 +9,14 @@ on:
         required: true
         default: 'https://github.com/mjl371/Actions-immortalwrt-mt7981/releases/download/sdk/immortalwrt-sdk-mediatek-mt7981_gcc-8.4.0_musl.Linux-x86_64.tar.xz'
         type: input
+      networkType:
+        description: '是否iptables'
+        required: true
+        default: 'iptables'
+        type: choice
+        options:
+        - nftables
+        - iptables
           
 env:
   TZ: Asia/Shanghai
@@ -60,10 +68,6 @@ jobs:
         rm -rf openwrt/feeds/packages/net/tailscale
         cp -r packages/net/tailscale openwrt/feeds/packages/net/tailscale
         
-        # git clone https://github.com/mjl371/Actions-immortalwrt-mt7981.git
-        # mv -f Actions-immortalwrt-mt7981/tailscale/Makefile openwrt/feeds/packages/net/tailscale/Makefile
-        # grep PKG_VERSION:= openwrt/feeds/packages/net/tailscale/Makefile |awk -F ':=' '{print $2}' > TAILSCALE_VERSION
-        
         curl -s https://api.github.com/repos/tailscale/tailscale/releases/latest |jq -r '.tag_name' |sed 's/v//' > TAILSCALE_VERSION
         echo "TAILSCALE_VERSION=$(cat TAILSCALE_VERSION)" >> $GITHUB_ENV
         cat TAILSCALE_VERSION
@@ -75,8 +79,10 @@ jobs:
 
         cat openwrt/feeds/packages/net/tailscale/Makefile
         
-        sed -i '$ s/nftables/iptables/' openwrt/feeds/packages/net/tailscale/files/tailscale.conf
-        
+    - name: choose network type
+      if: ${{ inputs.networkType == 'iptables' }}
+      run:  sed -i '$ s/nftables/iptables/' openwrt/feeds/packages/net/tailscale/files/tailscale.conf
+      
     - name: Install feeds
       run: cd openwrt && ./scripts/feeds install -a
         
@@ -86,22 +92,22 @@ jobs:
       run: |
         cd openwrt
         make defconfig
-        
         echo -e "$(nproc) thread compile"
-        
         make package/tailscale/compile V=s -j$(nproc)
 
         echo "status=success" >> $GITHUB_OUTPUT
         echo "FILE_DATE=_$(date +"%Y%m%d%H%M")" >> $GITHUB_ENV
 
-        find bin/packages/*/packages/ -name "*.ipk"  -exec basename {} \; |sed 's/\.[^.]*$//' > IPK_NAME
-        echo "FILE_NAME=_$(cat IPK_NAME)" >> $GITHUB_ENV
-
+    - name: Get tailscale ipk name
+      run: |
+        find openwrt/bin/packages/*/packages/ -name "*.ipk"  -exec basename {} \; |sed 's/\.[^.]*$//' > IPK_NAME
+        echo "FILE_NAME=$(cat IPK_NAME)" >> $GITHUB_ENV
+      
     - name: Upload tailscale ipk
       uses: actions/upload-artifact@main
       if: steps.compile.outputs.status == 'success' && ${{ inputs.tailscaleBranch }}!= 'none'
       with:
-        name: ${{ env.FILE_NAME }}
+        name: ${{ env.FILE_NAME }}_${{ inputs.networkType}}
         path: openwrt/bin/packages/*/packages/tailscale*.ipk
 
     - name: Clean Compile
