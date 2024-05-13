@@ -65,7 +65,7 @@ jobs:
       if:  ${{ inputs.tailscaleBranch }}!= 'none'
       run: |
       
-        git clone -b master https://github.com/immortalwrt/packages.git
+        git clone -b master https://github.com/openwrt/packages.git
   
         rm -rf openwrt/feeds/packages/lang/golang
         cp -r packages/lang/golang openwrt/feeds/packages/lang/golang
@@ -113,13 +113,6 @@ jobs:
       with:
         name: tailscale_${{ env.TAILSCALE_VERSION }}_ipk 
         path: openwrt/bin/packages/aarch64_cortex-a53/packages/tailscale*.ipk
-
-    # - name: Upload bin directory
-    #   uses: actions/upload-artifact@main
-    #   if: steps.compile.outputs.status == 'success' && ${{ inputs.UPLOAD_BIN_DIR }}
-    #   with:
-    #     name: OpenWrt_bin_${{ env.FILE_DATE }}
-    #     path: openwrt/bin
 
     - name: Clean Compile
       id: clean-compile
