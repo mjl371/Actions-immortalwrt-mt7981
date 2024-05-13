@@ -1,7 +1,7 @@
 
 name: Build Tailscale
 on:
-  # push:
+  push:
   workflow_dispatch:
     inputs:
       tailscaleBranch:
@@ -77,8 +77,8 @@ jobs:
         # mv -f Actions-immortalwrt-mt7981/tailscale/Makefile openwrt/feeds/packages/net/tailscale/Makefile
         # grep PKG_VERSION:= openwrt/feeds/packages/net/tailscale/Makefile |awk -F ':=' '{print $2}' > TAILSCALE_VERSION
         
-        # curl -s https://api.github.com/repos/tailscale/tailscale/releases/latest |jq -r '.tag_name' |sed 's/v//' > TAILSCALE_VERSION
-        # echo "TAILSCALE_VERSION=$(cat TAILSCALE_VERSION)" >> $GITHUB_ENV
+        curl -s https://api.github.com/repos/tailscale/tailscale/releases/latest |jq -r '.tag_name' |sed 's/v//' > TAILSCALE_VERSION
+        echo "TAILSCALE_VERSION=$(cat TAILSCALE_VERSION)" >> $GITHUB_ENV
         
         # wget -O tailscale.latest -q "https://codeload.github.com/tailscale/tailscale/tar.gz/v$TAILSCALE_VERSION"
         # sha256sum tailscale.latest |awk '{print $1}' > PKGTHASH
