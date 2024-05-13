@@ -94,11 +94,14 @@ jobs:
         echo "status=success" >> $GITHUB_OUTPUT
         echo "FILE_DATE=_$(date +"%Y%m%d%H%M")" >> $GITHUB_ENV
 
+        find openwrt/bin/packages/*/packages/ -name "*.ipk"  -exec basename {} \; |sed 's/\.[^.]*$//' > IPK_NAME
+        echo "FILE_NAME=_$(cat IPK_NAME)" >> $GITHUB_ENV
+
     - name: Upload tailscale ipk
       uses: actions/upload-artifact@main
       if: steps.compile.outputs.status == 'success' && ${{ inputs.tailscaleBranch }}!= 'none'
       with:
-        name: tailscale_${{ env.TAILSCALE_VERSION }}_ipk 
+        name: ${{ env.FILE_NAME }}
         path: openwrt/bin/packages/*/packages/tailscale*.ipk
 
     - name: Clean Compile
