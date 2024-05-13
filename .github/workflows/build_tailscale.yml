@@ -90,7 +90,7 @@ jobs:
         
     - name: Compile the firmware
       id: compile
-      if: ${{ inputs.COMPILE == 'true' }} && !cancelled()
+      if: ${{ !cancelled() }} 
       run: |
         cd openwrt
         make defconfig
