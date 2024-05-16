@@ -5,7 +5,7 @@ on:
     inputs:
       tailscaleVersion:
         description: 'tailscale版本'
-        required: false
+        required: true
         default: 'latest'
         type: input
       sdkURL:
@@ -75,28 +75,31 @@ jobs:
         rm -rf openwrt/feeds/packages/net/tailscale
         cp -r packages/net/tailscale openwrt/feeds/packages/net/tailscale
 
-        grep PKG_VERSION:= openwrt/feeds/packages/net/tailscale/Makefile |awk -F ':=' '{print $2}' > TAILSCALE_VERSION
-        echo "TAILSCALE_VERSION=$(cat TAILSCALE_VERSION)" >> $GITHUB_ENV
+        packagesVersion=$(grep PKG_VERSION:= openwrt/feeds/packages/net/tailscale/Makefile |awk -F ':=' '{print $2}')
+        echo "packagesVersion:$packagesVersion"
         
     - name: Update Latest Tailsclae
-      run: |    
-        
+      run: |
+      
         latestVersion=$(curl -s https://api.github.com/repos/tailscale/tailscale/releases/latest |jq -r '.tag_name' |sed 's/v//')
-
+        echo "latestVersion:$latestVersion"
+        
         if [ "${{ inputs.tailscaleVersion }}"="latest" ]; then
-            echo "$latestVersion" > TAILSCALE_VERSION
+            compileVersion=$latestVersion
+        elif [ "${{ inputs.tailscaleVersion }}"="packages" ]; then
+            compileVersion=$packagesVersion
         else
-            echo "${{ inputs.tailscaleVersion }}" > TAILSCALE_VERSION
+            compileVersion=$(echo "${{ inputs.tailscaleVersion }}"|sed 's/v//')
         fi
+
+        echo "compileVersion:$compileVersion"
+        echo "TAILSCALE_VERSION=$compileVersion" >> $GITHUB_ENV
         
-        echo "TAILSCALE_VERSION=$(cat TAILSCALE_VERSION)" >> $GITHUB_ENV
-        cat TAILSCALE_VERSION
-        
-        wget -O tailscale.tar.gz  "https://codeload.github.com/tailscale/tailscale/tar.gz/v$(cat TAILSCALE_VERSION)"
-        sha256sum tailscale.tar.gz |awk '{print $1}' > PKGHASH
+        wget -O tailscale.tar.gz  "https://codeload.github.com/tailscale/tailscale/tar.gz/v$compileVersion"
+        pkgHash=$(sha256sum tailscale.tar.gz |awk '{print $1}')
         cat PKGHASH
-        sed -i "s/PKG_VERSION:=.*/PKG_VERSION:=$(cat TAILSCALE_VERSION)/" openwrt/feeds/packages/net/tailscale/Makefile
-        sed -i "s/PKG_HASH:=.*/PKG_HASH:=$(cat PKGHASH)/" openwrt/feeds/packages/net/tailscale/Makefile
+        sed -i "s/PKG_VERSION:=.*/PKG_VERSION:=$compileVersion/" openwrt/feeds/packages/net/tailscale/Makefile
+        sed -i "s/PKG_HASH:=.*/PKG_HASH:=$pkgHash/" openwrt/feeds/packages/net/tailscale/Makefile
         cat openwrt/feeds/packages/net/tailscale/Makefile
 
     - name: choose network type
