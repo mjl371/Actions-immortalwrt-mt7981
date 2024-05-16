@@ -123,9 +123,15 @@ jobs:
       if: steps.compile.outputs.status == 'success' && ${{ inputs.UPLOAD_TRANSFER == 'true' }} && !cancelled()
       run: |
         curl -fsSL git.io/file-transfer | sh
-        ./transfer cat  $(find openwrt/bin/packages/ -name "tailscale*.ipk") 2>&1 | tee transfer.log
-        echo "::warning file=transfer::$(cat transfer.log | grep https)"
-        echo "url=$(cat transfer.log | grep https | cut -f3 -d" ")" >> $GITHUB_OUTPUT
+        ./transfer lit --no-progress $(find openwrt/bin/packages/ -name "tailscale*.ipk") 2>&1 | tee transfer.log
+        echo "::notice file=transfer::$(cat transfer.log | grep https)"
+        
+        downloadUrl=cat transfer.log | grep https | cut -f3 -d" "
+
+        echo "::notice file=download::$(cat transfer.log | grep https)"
+        echo "::notice file=install::wget -O taiscaleLatest.ipk $downloadUrl && opkg install taiscaleLatest.ipk"
+        
+        echo "url=$downloadUrl" >> $GITHUB_OUTPUT
 
     - name: action-bark
       uses: harryzcy/action-bark@v2.0.3
