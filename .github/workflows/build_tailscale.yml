@@ -124,14 +124,11 @@ jobs:
       run: |
         curl -fsSL git.io/file-transfer | sh
         ./transfer lit --no-progress $(find openwrt/bin/packages/ -name "tailscale*.ipk") 2>&1 | tee transfer.log
-        echo "::notice file=transfer::$(cat transfer.log | grep https)"
         
-        downloadUrl=cat transfer.log | grep https | cut -f3 -d" "
+        downloadUrl=$(cat transfer.log | grep https | cut -f3 -d" ")
 
         echo "::notice file=download::$(cat transfer.log | grep https)"
         echo "::notice file=install::wget -O taiscaleLatest.ipk $downloadUrl && opkg install taiscaleLatest.ipk"
-        
-        echo "url=$downloadUrl" >> $GITHUB_OUTPUT
 
     - name: action-bark
       uses: harryzcy/action-bark@v2.0.3
