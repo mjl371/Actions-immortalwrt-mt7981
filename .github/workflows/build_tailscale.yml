@@ -5,7 +5,7 @@ on:
     inputs:
       tailscaleVersion:
         description: 'tailscale版本'
-        required: true
+        required: false
         default: 'latest'
         type: input
       sdkURL:
@@ -65,9 +65,8 @@ jobs:
         sed -i '3,5d' feeds.conf.default
         ./scripts/feeds update -a
 
-    - name: Update Tailsclae
+    - name: Update Tailscale feeds
       run: |
-      
         git clone -b master https://github.com/immortalwrt/packages.git
   
         rm -rf openwrt/feeds/packages/lang/golang
@@ -78,11 +77,12 @@ jobs:
         packagesVersion=$(grep PKG_VERSION:= openwrt/feeds/packages/net/tailscale/Makefile |awk -F ':=' '{print $2}')
         echo "packagesVersion:$packagesVersion"
         
-    - name: Update Latest Tailsclae
+    - name: Choose Tailscale verison
       run: |
-      
         latestVersion=$(curl -s https://api.github.com/repos/tailscale/tailscale/releases/latest |jq -r '.tag_name' |sed 's/v//')
         echo "latestVersion:$latestVersion"
+
+        echo "inputVersion:${{ inputs.tailscaleVersion }}"
         
         if [ "${{ inputs.tailscaleVersion }}"="latest" ]; then
             compileVersion=$latestVersion
@@ -97,12 +97,12 @@ jobs:
         
         wget -O tailscale.tar.gz  "https://codeload.github.com/tailscale/tailscale/tar.gz/v$compileVersion"
         pkgHash=$(sha256sum tailscale.tar.gz |awk '{print $1}')
-        cat PKGHASH
+        echo "pkgHash:$pkgHash"
         sed -i "s/PKG_VERSION:=.*/PKG_VERSION:=$compileVersion/" openwrt/feeds/packages/net/tailscale/Makefile
         sed -i "s/PKG_HASH:=.*/PKG_HASH:=$pkgHash/" openwrt/feeds/packages/net/tailscale/Makefile
         cat openwrt/feeds/packages/net/tailscale/Makefile
 
-    - name: choose network type
+    - name: Choose network type
       if: ${{ inputs.networkType == 'iptables' }}
       run:  sed -i '$ s/nftables/iptables/' openwrt/feeds/packages/net/tailscale/files/tailscale.conf
       
@@ -124,8 +124,8 @@ jobs:
     - name: Get tailscale ipk name
       if: steps.compile.outputs.status == 'success' 
       run: |
-        find openwrt/bin/packages/*/packages/ -name "*.ipk"  -exec basename {} \; |sed 's/\.[^.]*$//' > IPK_NAME
-        echo "FILE_NAME=$(cat IPK_NAME)" >> $GITHUB_ENV
+        ipkName=$(find openwrt/bin/packages/*/packages/ -name "*.ipk"  -exec basename {} \; |sed 's/\.[^.]*$//')
+        echo "FILE_NAME=$ipkName" >> $GITHUB_ENV
       
     - name: Upload tailscale ipk
       uses: actions/upload-artifact@main
