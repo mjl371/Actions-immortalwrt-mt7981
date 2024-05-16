@@ -16,8 +16,8 @@ on:
         options:
         - nftables
         - iptables
-      UPLOAD_WETRANSFER:
-        description: '上传到WETRANSFER'
+      UPLOAD_TRANSFER:
+        description: '使用transfer上传R'
         default: false
         required: true
         type: boolean
@@ -120,7 +120,7 @@ jobs:
 
     - name: File Transfer
       id: Transfer
-      if: steps.compile.outputs.status == 'success' && ${{ inputs.UPLOAD_WETRANSFER == 'true' }} && !cancelled()
+      if: steps.compile.outputs.status == 'success' && ${{ inputs.UPLOAD_TRANSFER == 'true' }} && !cancelled()
       run: |
         curl -fsSL git.io/file-transfer | sh
         ./transfer cat  $(find openwrt/bin/packages/ -name "tailscale*.ipk") 2>&1 | tee transfer.log
