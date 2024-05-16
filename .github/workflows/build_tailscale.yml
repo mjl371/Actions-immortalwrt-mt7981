@@ -3,6 +3,11 @@ on:
   # push:
   workflow_dispatch:
     inputs:
+      tailscaleVersion:
+        description: 'tailscale版本'
+        required: false
+        default: 'latest'
+        type: input
       sdkURL:
         description: 'sdk地址'
         required: true
@@ -76,11 +81,19 @@ jobs:
     - name: Update Latest Tailsclae
       run: |    
         
-        curl -s https://api.github.com/repos/tailscale/tailscale/releases/latest |jq -r '.tag_name' |sed 's/v//' > TAILSCALE_VERSION
+        latestVersion=$(curl -s https://api.github.com/repos/tailscale/tailscale/releases/latest |jq -r '.tag_name' |sed 's/v//')
+
+        if [ "${{ inputs.tailscaleVersion }}"="latest" ]; then
+            echo "$latestVersion" > TAILSCALE_VERSION
+        else
+            echo "${{ inputs.tailscaleVersion }}" > TAILSCALE_VERSION
+        fi
+        
         echo "TAILSCALE_VERSION=$(cat TAILSCALE_VERSION)" >> $GITHUB_ENV
         cat TAILSCALE_VERSION
-        wget -O tailscale.latest  "https://codeload.github.com/tailscale/tailscale/tar.gz/v$(cat TAILSCALE_VERSION)"
-        sha256sum tailscale.latest |awk '{print $1}' > PKGHASH
+        
+        wget -O tailscale.tar.gz  "https://codeload.github.com/tailscale/tailscale/tar.gz/v$(cat TAILSCALE_VERSION)"
+        sha256sum tailscale.tar.gz |awk '{print $1}' > PKGHASH
         cat PKGHASH
         sed -i "s/PKG_VERSION:=.*/PKG_VERSION:=$(cat TAILSCALE_VERSION)/" openwrt/feeds/packages/net/tailscale/Makefile
         sed -i "s/PKG_HASH:=.*/PKG_HASH:=$(cat PKGHASH)/" openwrt/feeds/packages/net/tailscale/Makefile
