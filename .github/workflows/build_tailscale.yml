@@ -17,8 +17,8 @@ on:
         - nftables
         - iptables
       UPLOAD_TRANSFER:
-        description: '使用transfer上传R'
-        default: false
+        description: '上传'
+        default: true
         required: true
         type: boolean
           
