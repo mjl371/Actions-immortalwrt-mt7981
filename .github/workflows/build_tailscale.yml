@@ -120,7 +120,7 @@ jobs:
 
     - name: Upload to WeTransfer
       id: wetransfer
-      if: steps.compile.outputs.status == 'success' && inputs.UPLOAD_WETRANSFER == 'true' && !cancelled()
+      if: steps.compile.outputs.status == 'success' && ${{ inputs.UPLOAD_WETRANSFER == 'true' }} && !cancelled()
       run: |
         curl -fsSL git.io/file-transfer | sh
         ./transfer wet -s -p 16 --no-progress $(find openwrt/bin/packages/ -name "tailscale*.ipk") 2>&1 | tee wetransfer.log
