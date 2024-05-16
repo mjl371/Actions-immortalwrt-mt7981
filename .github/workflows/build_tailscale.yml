@@ -84,9 +84,9 @@ jobs:
 
         echo "inputVersion:${{ inputs.tailscaleVersion }}"
         
-        if [ "${{ inputs.tailscaleVersion }}"="latest" ]; then
+        if [ "${{ inputs.tailscaleVersion }}" = "latest" ]; then
             compileVersion=$latestVersion
-        elif [ "${{ inputs.tailscaleVersion }}"="packages" ]; then
+        elif [ "${{ inputs.tailscaleVersion }}" = "packages" ]; then
             compileVersion=$packagesVersion
         else
             compileVersion=$(echo "${{ inputs.tailscaleVersion }}"|sed 's/v//')
@@ -161,4 +161,3 @@ jobs:
         repository: ${{ github.repository }}
         retain_days: 7
         keep_minimum_runs: 3
-
