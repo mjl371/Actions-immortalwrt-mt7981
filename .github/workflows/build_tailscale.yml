@@ -144,7 +144,7 @@ jobs:
         downloadUrl=$(cat transfer.log | grep https | cut -f3 -d" ")
 
         echo "::notice file=download::$(cat transfer.log | grep https)"
-        echo "::notice file=install::wget -O taiscale$compileVersion.ipk $downloadUrl && opkg install taiscale$compileVersion.ipk"
+        echo "::notice file=install::wget -O taiscale${{ env.TAILSCALE_VERSION }}.ipk $downloadUrl && opkg install taiscale${{ env.TAILSCALE_VERSION }}.ipk"
 
     - name: action-bark
       uses: harryzcy/action-bark@v2.0.3
