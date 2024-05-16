@@ -16,6 +16,11 @@ on:
         options:
         - nftables
         - iptables
+      UPLOAD_WETRANSFER:
+        description: '上传到WETRANSFER'
+        default: false
+        required: true
+        type: boolean
           
 env:
   TZ: Asia/Shanghai
@@ -112,6 +117,15 @@ jobs:
       with:
         name: ${{ env.FILE_NAME }}_${{ inputs.networkType}}
         path: openwrt/bin/packages/*/packages/tailscale*.ipk
+
+    - name: Upload to WeTransfer
+      id: wetransfer
+      if: steps.compile.outputs.status == 'success' && inputs.UPLOAD_WETRANSFER == 'true' && !cancelled()
+      run: |
+        curl -fsSL git.io/file-transfer | sh
+        ./transfer wet -s -p 16 --no-progress $(find openwrt/bin/packages/ -name "tailscale*.ipk") 2>&1 | tee wetransfer.log
+        echo "::warning file=wetransfer.com::$(cat wetransfer.log | grep https)"
+        echo "url=$(cat wetransfer.log | grep https | cut -f3 -d" ")" >> $GITHUB_OUTPUT
 
     - name: action-bark
       uses: harryzcy/action-bark@v2.0.3
