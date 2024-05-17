@@ -80,6 +80,8 @@ jobs:
         
     - name: Choose Tailscale verison
       run: |
+        newVersion=$(curl -s https://api.github.com/repos/tailscale/tailscale/releases |jq -r '.[0].tag_name' |sed 's/v//')
+        echo "newVersion:$newVersion"
         latestVersion=$(curl -s https://api.github.com/repos/tailscale/tailscale/releases/latest |jq -r '.tag_name' |sed 's/v//')
         echo "latestVersion:$latestVersion"
 
