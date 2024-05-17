@@ -15,7 +15,7 @@ on:
         type: input
       networkType:
         description: '是否iptables'
-        required: true
+        required: false
         default: 'iptables'
         type: choice
         options:
@@ -23,7 +23,7 @@ on:
         - iptables
       UPLOAD_TRANSFER:
         description: '上传'
-        default: true
+        default: false
         required: true
         type: boolean
           
