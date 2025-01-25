@@ -148,7 +148,28 @@ jobs:
 
         echo "::notice file=download::$(cat transfer.log | grep https)"
         echo "::notice file=install::wget -O taiscale${{ env.TAILSCALE_VERSION }}.ipk $downloadUrl && opkg install taiscale${{ env.TAILSCALE_VERSION }}.ipk"
-
+    
+    - name: ffsend
+      id: ffsend
+      if: steps.compile.outputs.status == 'success' && ${{ inputs.UPLOAD_TRANSFER == 'true' }} && !cancelled()
+      run: |
+        # 安装 ffsend (如果尚未安装)
+        if ! command -v ffsend &>/dev/null; then
+          snap install ffsend
+        fi
+    
+        # 使用 ffsend 上传软件包
+        upload_output=$(ffsend upload $(find openwrt/bin/packages/ -name "tailscale*.ipk") 2>&1)
+    
+        # 提取下载 URL 和删除 URL
+        download_url=$(echo "$upload_output" | grep "Download URL:" | awk '{print $3}')
+        deletion_url=$(echo "$upload_output" | grep "Deletion URL:" | awk '{print $3}')
+    
+        # 输出 URL
+        echo "::notice file=download::$download_url"
+        echo "::notice file=install::wget -O taiscale${{ env.TAILSCALE_VERSION }}.ipk \"$download_url\" && opkg install taiscale${{ env.TAILSCALE_VERSION }}.ipk"
+        echo "::notice file=delete::$deletion_url" # 重要：输出删除 URL！
+    
     - name: action-bark
       uses: harryzcy/action-bark@v2.0.3
       if: ${{ !cancelled() }}
