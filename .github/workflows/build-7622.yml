@@ -18,20 +18,15 @@ on:
 
         UPLOAD_BIN_DIR:
           description: '上传bin文件夹'
-          default: false
+          default: true
           required: true
           type: boolean
         UPLOAD_FIRMWARE:
           description: '上传固件'
-          default: false
+          default: true
           required: true
           type: boolean
 
-        UPLOAD_RELEASE:
-          description: '发布RELEASE'
-          default: false
-          required: true
-          type: boolean
 
 env:
   REPO_URL: https://github.com/immortalwrt/immortalwrt.git
@@ -97,14 +92,14 @@ jobs:
         cd openwrt
         $GITHUB_WORKSPACE/$DIY_P2_SH
 
-    # - name: Download package
-    #   id: package
-    #   run: |
-    #     cd openwrt
-    #     make defconfig
-    #     make download -j8
-    #     find dl -size -1024c -exec ls -l {} \;
-    #     find dl -size -1024c -exec rm -f {} \;
+    - name: Download package
+      id: package
+      run: |
+        cd openwrt
+        make defconfig
+        make download -j8
+        find dl -size -1024c -exec ls -l {} \;
+        find dl -size -1024c -exec rm -f {} \;
 
     - name: Compile the firmware
       id: compile
@@ -123,7 +118,7 @@ jobs:
 
     - name: Upload bin directory
       uses: actions/upload-artifact@main
-      if: steps.compile.outputs.status == 'success' && inputs.UPLOAD_BIN_DIR == 'true'
+      # if: steps.compile.outputs.status == 'success' && inputs.UPLOAD_BIN_DIR == 'true'
       with:
         name: OpenWrt_bin${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
         path: openwrt/bin
