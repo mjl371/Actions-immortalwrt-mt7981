@@ -169,7 +169,7 @@ jobs:
         echo "::notice file=install::wget -O taiscale${{ env.TAILSCALE_VERSION }}.ipk $downloadUrl && opkg install taiscale${{ env.TAILSCALE_VERSION }}.ipk"
     
     - name: action-bark
-      uses: harryzcy/action-bark@v2.0.3
+      uses: harryzcy/action-bark@v2.3.0
       if: ${{ !cancelled() }}
       with:
         status: ${{ job.status }}

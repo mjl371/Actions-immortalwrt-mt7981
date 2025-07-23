@@ -143,6 +143,14 @@ jobs:
         cd openwrt
         make clean
 
+    - name: action-bark
+      uses: harryzcy/action-bark@v2.3.0
+      if: ${{ !cancelled() }}
+      with:
+        status: ${{ job.status }}
+        device_key: ${{ secrets.BARK_DEVICE_KEY }}
+        bark_server_url: ${{ secrets.BARK_SERVER_URL }}
+
     - name: Delete workflow runs
       uses: Mattraks/delete-workflow-runs@v2
       with:
