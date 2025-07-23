@@ -7,12 +7,12 @@ on:
         description: 'tailscale版本'
         required: false
         default: 'latest'
-        type: input
+        type: string
       sdkURL:
         description: 'sdk地址'
         required: true
         default: 'https://github.com/mjl371/Actions-immortalwrt-mt7981/releases/download/sdk/immortalwrt-sdk-mediatek-mt7981_gcc-8.4.0_musl.Linux-x86_64.tar.xz'
-        type: input
+        type: string
       networkType:
         description: '是否iptables'
         required: false
@@ -143,18 +143,22 @@ jobs:
         echo "status=success" >> $GITHUB_OUTPUT
         echo "FILE_DATE=_$(date +"%Y%m%d%H%M")" >> $GITHUB_ENV
 
-    - name: Get tailscale ipk name
-      if: steps.compile.outputs.status == 'success' 
+    - name: Get tailscale package name
+      if: steps.compile.outputs.status == 'success'
       run: |
-        ipkName=$(find openwrt/bin/packages/*/packages/ -name "*.ipk"  -exec basename {} \; |sed 's/\.[^.]*$//')
-        echo "FILE_NAME=$ipkName" >> $GITHUB_ENV
-      
-    - name: Upload tailscale ipk
+        # Find both .ipk and .apk files, and get their base names without extension
+        packageName=$(find openwrt/bin/packages/*/packages/ -name "*.ipk" -o -name "*.apk" -exec basename {} \; | sed 's/\.[^.]*$//' | head -n 1)
+        echo "FILE_NAME=$packageName" >> $GITHUB_ENV
+
+    - name: Upload tailscale ipk/apk
       uses: actions/upload-artifact@main
-      if: steps.compile.outputs.status == 'success' 
+      if: steps.compile.outputs.status == 'success'
       with:
         name: ${{ env.FILE_NAME }}_${{ inputs.networkType}}
-        path: openwrt/bin/packages/*/packages/tailscale*.ipk
+        # Upload both .ipk and .apk files that start with "tailscale"
+        path: |
+          openwrt/bin/packages/*/packages/tailscale*.ipk
+          openwrt/bin/packages/*/packages/tailscale*.apk
 
     - name: File Transfer
       id: Transfer
